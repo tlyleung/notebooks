@@ -130,3 +130,47 @@ for line in puzzle_input.split(","):
                 total += i
 
 print(total)
+
+# %% [markdown]
+# # Day 3
+#
+
+# %%
+puzzle_input = open("../data/aoc/2025/03.txt", mode="r").read()
+
+puzzle_example = """987654321111111
+811111111111119
+234234234234278
+818181911112111
+"""
+
+# %%
+total = 0
+
+for line in puzzle_input.split("\n"):
+    if line.strip():
+        bank = [int(c) for c in line]
+        digit1 = max(bank[:-1])
+        idx = bank.index(digit1)
+        digit2 = max(bank[idx + 1 :])
+        total += digit1 * 10 + digit2
+
+print(total)
+
+# %%
+total = 0
+
+for line in puzzle_input.split("\n"):
+    if line.strip():
+        bank = [int(c) for c in line]
+        d = 0
+        i = 0
+        for _ in range(12):
+            j = len(bank) + d - 11
+            subbank = bank[i:j]
+            digit = max(subbank)
+            d += 1
+            i += subbank.index(digit) + 1
+            total += digit * 10 ** (12 - d)
+
+print(total)
