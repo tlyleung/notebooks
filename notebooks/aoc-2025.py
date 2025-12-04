@@ -174,3 +174,85 @@ for line in puzzle_input.split("\n"):
             total += digit * 10 ** (12 - d)
 
 print(total)
+
+# %% [markdown]
+# # Day 4
+#
+
+# %%
+puzzle_input = open("../data/aoc/2025/04.txt", mode="r").read()
+
+puzzle_example = """..@@.@@@@.
+@@@.@.@.@@
+@@@@@.@.@@
+@.@@@@..@.
+@@.@@@@.@@
+.@@@@@@@.@
+.@.@.@.@@@
+@.@@@.@@@@
+.@@@@@@@@.
+@.@.@@@.@.
+"""
+
+# %%
+directions = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+
+grid = [list(line) for line in puzzle_input.splitlines()]
+m, n = len(grid), len(grid[0])
+
+total = 0
+for x in range(m):
+    for y in range(n):
+        if grid[x][y] == ".":
+            continue
+
+        r = 0
+        for dx, dy in directions:
+            if 0 <= (x + dx) < m and 0 <= (y + dy) < n and grid[x + dx][y + dy] != ".":
+                r += 1
+
+        if r < 4:
+            total += 1
+
+print(total)
+
+
+# %%
+directions = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+
+grid = [list(line) for line in puzzle_input.splitlines()]
+m, n = len(grid), len(grid[0])
+
+
+rolls = set()
+for x in range(m):
+    for y in range(n):
+        if grid[x][y] == ".":
+            continue
+
+        r = 0
+        for dx, dy in directions:
+            if 0 <= (x + dx) < m and 0 <= (y + dy) < n and grid[x + dx][y + dy] != ".":
+                r += 1
+
+        if r < 4:
+            rolls.add((x, y))
+
+        grid[x][y] = str(r)
+
+
+total = 0
+while rolls:
+    x, y = rolls.pop()
+    grid[x][y] = "."
+    total += 1
+
+    for dx, dy in directions:
+        if 0 <= (x + dx) < m and 0 <= (y + dy) < n and grid[x + dx][y + dy] != ".":
+            r = int(grid[x + dx][y + dy]) - 1
+            grid[x + dx][y + dy] = str(r)
+
+            if r < 4:
+                rolls.add((x + dx, y + dy))
+
+print(total)
