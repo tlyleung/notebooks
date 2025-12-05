@@ -256,3 +256,59 @@ while rolls:
                 rolls.add((x + dx, y + dy))
 
 print(total)
+
+# %% [markdown]
+# # Day 5
+#
+
+# %%
+puzzle_input = open("../data/aoc/2025/05.txt", mode="r").read()
+
+puzzle_example = """3-5
+10-14
+16-20
+12-18
+
+1
+5
+8
+11
+17
+32"""
+
+# %%
+intervals, ids = puzzle_input.split("\n\n")
+
+intervals = [tuple(map(int, interval.split("-"))) for interval in intervals.split("\n")]
+intervals = sorted(intervals, key=lambda x: x[0])
+
+ids = [int(a) for a in ids.split("\n")]
+
+
+fresh = 0
+for id in ids:
+    for interval in intervals:
+        if interval[0] <= id <= interval[1]:
+            fresh += 1
+            break
+
+print(fresh)
+
+# %%
+intervals, ids = puzzle_input.split("\n\n")
+
+intervals = [tuple(map(int, a.split("-"))) for a in intervals.split("\n")]
+intervals = sorted(intervals, key=lambda x: x[0])
+
+merged = []
+for interval in intervals:
+    if not merged or merged[-1][1] < interval[0]:
+        merged.append(interval)
+    else:
+        merged[-1] = (merged[-1][0], max(merged[-1][1], interval[1]))
+
+fresh = 0
+for start, end in merged:
+    fresh += end - start + 1
+
+print(fresh)
