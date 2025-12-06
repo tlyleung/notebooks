@@ -13,6 +13,10 @@
 #     name: python3
 # ---
 
+# %%
+import functools
+import operator
+
 # %% [markdown]
 # # Day 1
 #
@@ -312,3 +316,54 @@ for start, end in merged:
     fresh += end - start + 1
 
 print(fresh)
+
+# %% [markdown]
+#
+
+# %% [markdown]
+# # Day 6
+#
+
+# %%
+puzzle_input = open("../data/aoc/2025/06.txt", mode="r").read()
+
+puzzle_example = """123 328  51 64 
+ 45 64  387 23 
+  6 98  215 314
+*   +   *   +  """
+
+# %%
+operators = {"+": operator.add, "*": operator.mul}
+
+*lines, ops = [line.split() for line in puzzle_input.split("\n")]
+
+total = 0
+for i in range(len(ops)):
+    op = operators[ops[i]]
+    nums = map(int, [line[i] for line in lines])
+    total += functools.reduce(op, nums)
+
+print(total)
+
+# %%
+operators = {"+": operator.add, "*": operator.mul}
+
+*_, ops = [line.split() for line in puzzle_input.split("\n")]
+*lines, _ = [line for line in puzzle_input.split("\n")]
+
+total = 0
+nums = []
+op_idx = 0
+for i in range(len(lines[0])):
+    digits = "".join([line[i] for line in lines])
+
+    if digits.strip():  # zero columns
+        nums.append(int(digits))
+    else:
+        total += functools.reduce(operators[ops[op_idx]], nums)
+        nums = []
+        op_idx += 1
+
+total += functools.reduce(operators[ops[op_idx]], nums)
+
+print(total)
