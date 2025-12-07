@@ -367,3 +367,68 @@ for i in range(len(lines[0])):
 total += functools.reduce(operators[ops[op_idx]], nums)
 
 print(total)
+
+# %% [markdown]
+# # Day 7
+#
+
+# %%
+puzzle_input = open("../data/aoc/2025/07.txt", mode="r").read()
+
+puzzle_example = """.......S.......
+...............
+.......^.......
+...............
+......^.^......
+...............
+.....^.^.^.....
+...............
+....^.^...^....
+...............
+...^.^...^.^...
+...............
+..^...^.....^..
+...............
+.^.^.^.^.^...^.
+..............."""
+
+# %%
+lines = [list(line) for line in puzzle_input.split("\n")]
+m, n = len(lines), len(lines[0])
+
+splits = 0
+for r in range(m - 1):
+    l1 = lines[r]
+    l2 = lines[r + 1]
+    for c in range(n):
+        if l2[c] == "." and l1[c] in ["S", "|"]:
+            l2[c] = "|"
+        elif l2[c] == "^" and l1[c] in ["S", "|"]:
+            l2[c - 1] = "|"
+            l2[c + 1] = "|"
+            splits += 1
+
+print(splits)
+
+
+# %%
+lines = [list(line) for line in puzzle_input.split("\n")]
+m, n = len(lines), len(lines[0])
+
+test = [0] * n
+test[lines[0].index("S")] = 1
+
+for r in range(m - 1):
+    l1 = lines[r]
+    l2 = lines[r + 1]
+    for c in range(n):
+        if l2[c] == "." and l1[c] in ["S", "|"]:
+            l2[c] = "|"
+        elif l2[c] == "^" and l1[c] in ["S", "|"]:
+            l2[c - 1] = "|"
+            l2[c + 1] = "|"
+            test[c - 1] += test[c]
+            test[c + 1] += test[c]
+            test[c] = 0
+
+print(sum(test))
