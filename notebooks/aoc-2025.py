@@ -15,6 +15,7 @@
 
 # %%
 import functools
+import itertools
 import operator
 
 # %% [markdown]
@@ -432,3 +433,98 @@ for r in range(m - 1):
             test[c] = 0
 
 print(sum(test))
+
+# %% [markdown]
+# # Day 8
+#
+
+# %%
+puzzle_input = open("../data/aoc/2025/08.txt", mode="r").read()
+
+puzzle_example = """162,817,812
+57,618,57
+906,360,560
+592,479,940
+352,342,300
+466,668,158
+542,29,236
+431,825,988
+739,650,466
+52,470,668
+216,146,977
+819,987,18
+117,168,530
+805,96,715
+346,949,466
+970,615,88
+941,993,340
+862,61,35
+984,92,344
+425,690,689"""
+
+
+# %%
+class UnionFind:
+    def __init__(self, size: int):
+        self.count = size
+        self.parent = list(range(size))
+        self.size = [1] * size
+
+    def find(self, x: int) -> int:
+        while self.parent[x] != x:
+            x = self.parent[x]
+        return x
+
+    def union(self, x: int, y: int) -> None:
+        rootX = self.find(x)
+        rootY = self.find(y)
+        if rootX != rootY:
+            self.parent[rootX] = rootY
+            self.count -= 1
+            self.size[rootY] += self.size[rootX]
+            self.size[rootX] = 0
+
+    def connected(self, x: int, y: int) -> bool:
+        rootX = self.find(x)
+        rootY = self.find(y)
+        return rootX == rootY
+
+
+# %%
+points = [tuple(map(int, point.split(","))) for point in puzzle_input.split("\n")]
+ids = {p: i for i, p in enumerate(points)}
+
+pairs = []
+for p1, p2 in itertools.combinations(points, 2):
+    x1, y1, z1 = p1
+    x2, y2, z2 = p2
+    distance = ((x1 - x2) ** 2 + (y1 - y2) ** 2 + (z1 - z2) ** 2) ** 0.5
+    pairs.append((distance, (p1, p2)))
+
+pairs.sort()
+
+uf = UnionFind(len(ids))
+for _, (p1, p2) in pairs[:1000]:
+    uf.union(ids[p1], ids[p2])
+
+print(functools.reduce(operator.mul, sorted(uf.size)[-3:]))
+
+# %%
+points = [tuple(map(int, point.split(","))) for point in puzzle_input.split("\n")]
+ids = {p: i for i, p in enumerate(points)}
+
+pairs = []
+for p1, p2 in itertools.combinations(points, 2):
+    x1, y1, z1 = p1
+    x2, y2, z2 = p2
+    distance = ((x1 - x2) ** 2 + (y1 - y2) ** 2 + (z1 - z2) ** 2) ** 0.5
+    pairs.append((distance, (p1, p2)))
+
+pairs.sort()
+
+uf = UnionFind(len(ids))
+for _, (p1, p2) in pairs:
+    uf.union(ids[p1], ids[p2])
+    if max(uf.size) == sum(uf.size):
+        print(p1[0] * p2[0])
+        break
