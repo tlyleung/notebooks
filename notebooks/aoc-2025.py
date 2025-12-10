@@ -528,3 +528,112 @@ for _, (p1, p2) in pairs:
     if max(uf.size) == sum(uf.size):
         print(p1[0] * p2[0])
         break
+
+# %% [markdown]
+# # Day 9
+#
+
+# %%
+puzzle_input = open("../data/aoc/2025/09.txt", mode="r").read()
+
+puzzle_example = """7,1
+11,1
+11,7
+9,7
+9,5
+2,5
+2,3
+7,3"""
+
+# %%
+points = [tuple(map(int, line.split(","))) for line in puzzle_input.split("\n")]
+
+max_area = 0
+for (x1, y1), (x2, y2) in itertools.combinations(points, 2):
+    area = (abs(x1 - x2) + 1) * (abs(y1 - y2) + 1)
+    if area > max_area:
+        max_area = area
+
+print(max_area)
+
+
+# %%
+def point_in_polygon(px, py, line_segments):
+    crossings = 0
+
+    for (x1, y1), (x2, y2) in line_segments:
+        if x1 == x2:  # vertical
+            if y1 <= py <= y2 and px == x1:
+                return True  # on vertical edge
+
+            # Ray-cast: does horizontal ray to the right from (px, py)
+            # intersect this vertical segment?
+            if y1 <= py < y2 and x1 > px:
+                crossings += 1
+
+        elif y1 == y2:  # horizontal
+            if x1 <= px <= x2 and py == y1:
+                return True  # on horizontal edge
+
+            # Horizontal edges don't affect crossings
+            continue
+
+    return crossings % 2 == 1
+
+
+def intersects(ls1, ls2):
+    p1, p2 = ls1
+    p3, p4 = ls2
+
+    # Both vertical
+    if p1[0] == p2[0] and p3[0] == p4[0]:
+        return False
+
+    # Both horizontal
+    if p1[1] == p2[1] and p3[1] == p4[1]:
+        return False
+
+    if p1[0] == p2[0]:  # ls1 vertical
+        if p3[1] == p4[1]:  # ls2 horizontal
+            return p1[1] < p3[1] < p2[1] and p3[0] < p1[0] < p4[0]
+
+    if p3[0] == p4[0]:  # ls2 vertical
+        if p1[1] == p2[1]:  # ls1 horizontal
+            return p3[0] < p1[0] < p4[0] and p3[1] < p1[1] < p4[1]
+
+    return False
+
+
+points = [tuple(map(int, line.split(","))) for line in puzzle_input.split("\n")]
+
+line_segments = list(sorted(ls) for ls in itertools.pairwise(points + [points[0]]))
+
+
+max_area = 0
+for (x1, y1), (x2, y2) in itertools.combinations(points, 2):
+    area = (abs(x1 - x2) + 1) * (abs(y1 - y2) + 1)
+    if area > max_area:
+        # Check if rectangle sides intersect any line segments
+        rect_sides = [
+            tuple(sorted([(x1, y1), (x2, y1)])),
+            tuple(sorted([(x1, y1), (x1, y2)])),
+            tuple(sorted([(x2, y1), (x2, y2)])),
+            tuple(sorted([(x1, y2), (x2, y2)])),
+        ]
+
+        intersection = any(
+            intersects(ls1, ls2) for ls1 in rect_sides for ls2 in line_segments
+        )
+
+        if intersection:
+            continue
+
+        # Check if rectangle corners are inside the polygon
+        rect_corners = [(x1, y1), (x1, y2), (x2, y1), (x2, y2)]
+        if not all(point_in_polygon(px, py, line_segments) for px, py in rect_corners):
+            continue
+
+        max_area = area
+
+print(max_area)
+
