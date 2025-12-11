@@ -14,9 +14,11 @@
 # ---
 
 # %%
+import collections
 import functools
 import itertools
 import operator
+import z3
 
 # %% [markdown]
 # # Day 1
@@ -637,3 +639,83 @@ for (x1, y1), (x2, y2) in itertools.combinations(points, 2):
 
 print(max_area)
 
+
+# %% [markdown]
+# # Day 10
+#
+
+# %%
+puzzle_input = open("../data/aoc/2025/10.txt", mode="r").read()
+
+puzzle_example = """[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
+[...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}
+[.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}"""
+
+
+# %%
+def compute(final_lights, buttons):
+    start_lights = tuple([False] * len(final_lights))
+    final_lights = tuple(light == "#" for light in final_lights)
+
+    seen = set[bool](start_lights)
+    stack = collections.deque([(0, start_lights)])
+    while stack:
+        depth, lights = stack.popleft()
+        if lights == final_lights:
+            return depth
+
+        for button in buttons:
+            new_lights = tuple(
+                not lights[i] if i in button else lights[i] for i in range(len(lights))
+            )
+            if new_lights in seen:
+                continue
+
+            seen.add(new_lights)
+            stack.append((depth + 1, new_lights))
+
+
+presses = 0
+for line in puzzle_input.split("\n"):
+    lights, *buttons, joltage = line.split(" ")
+    lights = tuple(lights.strip("[]"))
+    buttons = [set(map(int, button.strip("()").split(","))) for button in buttons]
+    joltage = tuple(map(int, joltage.strip("{}").split(",")))
+    presses += compute(lights, buttons)
+
+print(presses)
+
+
+# %%
+def compute(final_joltage, buttons):
+    opt = z3.Optimize()
+    x = z3.IntVector("x", len(buttons))
+
+    # Constraint 1: Presses cannot be negative
+    opt.add([x_i >= 0 for x_i in x])
+
+    # Constraint 2: Sum of button effects must equal final_joltage for each position
+    for j, target in enumerate(final_joltage):
+        opt.add(z3.Sum(x[i] for i, b in enumerate(buttons) if j in b) == target)
+
+    # Goal: Minimize total presses
+    opt.minimize(z3.Sum(x))
+
+    # Solve
+    if opt.check() != z3.sat:
+        return -1
+
+    # Get results
+    m = opt.model()
+    return sum(m[x_i].as_long() for x_i in x)
+
+
+presses = 0
+for line in puzzle_input.split("\n"):
+    lights, *buttons, joltage = line.split(" ")
+    lights = tuple(lights.strip("[]"))
+    buttons = [set(map(int, button.strip("()").split(","))) for button in buttons]
+    joltage = tuple(map(int, joltage.strip("{}").split(",")))
+    presses += compute(joltage, buttons)
+
+print(presses)
