@@ -719,3 +719,70 @@ for line in puzzle_input.split("\n"):
     presses += compute(joltage, buttons)
 
 print(presses)
+
+# %% [markdown]
+# # Day 11
+#
+
+# %%
+puzzle_input = open("../data/aoc/2025/11.txt", mode="r").read()
+
+puzzle_example1 = """aaa: you hhh
+you: bbb ccc
+bbb: ddd eee
+ccc: ddd eee fff
+ddd: ggg
+eee: out
+fff: out
+ggg: out
+hhh: ccc fff iii
+iii: out"""
+
+puzzle_example2 = """svr: aaa bbb
+aaa: fft
+fft: ccc
+bbb: tty
+tty: ccc
+ccc: ddd eee
+ddd: hub
+hub: fff
+eee: dac
+dac: fff
+fff: ggg hhh
+ggg: out
+hhh: out"""
+
+# %%
+lines = [line.split(":") for line in puzzle_input.split("\n")]
+devices = {line[0]: line[1].split() for line in lines}
+
+
+def paths(in_device):
+    return 1 if in_device == "out" else sum(paths(d) for d in devices[in_device])
+
+
+print(paths("you"))
+
+# %%
+lines = [line.split(":") for line in puzzle_input.split("\n")]
+devices = {line[0]: line[1].split() for line in lines}
+
+
+@functools.cache
+def paths(in_device, out_device, avoid_devices):
+    if in_device in avoid_devices:
+        return 0
+    elif in_device == out_device:
+        return 1
+    else:
+        return sum(paths(d, out_device, avoid_devices) for d in devices[in_device])
+
+
+svr_dac = paths("svr", "dac", ("fft", "out"))
+svr_fft = paths("svr", "fft", ("dac", "out"))
+dac_fft = paths("dac", "fft", ("svr", "out"))
+fft_dac = paths("fft", "dac", ("svr", "out"))
+dac_out = paths("dac", "out", ("svr", "fft"))
+fft_out = paths("fft", "out", ("svr", "dac"))
+
+print((svr_dac * dac_fft * fft_out) + (svr_fft * fft_dac * dac_out))
