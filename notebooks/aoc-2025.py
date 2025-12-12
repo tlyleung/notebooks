@@ -786,3 +786,60 @@ dac_out = paths("dac", "out", ("svr", "fft"))
 fft_out = paths("fft", "out", ("svr", "dac"))
 
 print((svr_dac * dac_fft * fft_out) + (svr_fft * fft_dac * dac_out))
+
+# %% [markdown]
+# # Day 12
+#
+
+# %%
+puzzle_input = open("../data/aoc/2025/12.txt", mode="r").read()
+
+puzzle_example = """
+0:
+###
+##.
+##.
+
+1:
+###
+##.
+.##
+
+2:
+.##
+###
+##.
+
+3:
+##.
+###
+##.
+
+4:
+###
+#..
+###
+
+5:
+###
+.#.
+###
+
+4x4: 0 0 0 0 2 0
+12x5: 1 0 1 0 2 2
+12x5: 1 0 1 0 3 2
+"""
+
+# %%
+*_, lines = [line.split("\n") for line in puzzle_input.split("\n\n")]
+
+total = 0
+for line in lines:
+    a, b = line.split(":")
+    w, h = map(int, a.split("x"))
+    quantities = map(int, b.split())
+
+    if sum(quantities) * 9 <= w * h:
+        total += 1
+
+print(total)
